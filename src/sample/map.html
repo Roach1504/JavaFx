@@ -26,257 +26,21 @@
 <body>
 
 
-
-<!-- <div class="btn-group">
-  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    Action <span class="caret"></span>
-  </button>
-  <ul class="dropdown-menu">
-    <li><a href="#">Action</a></li>
-    <li><a href="#">Another action</a></li>
-    <li><a href="#">Something else here</a></li>
-    <li role="separator" class="divider"></li>
-    <li><a href="#">Separated link</a></li>
-  </ul>
-</div> -->
-<!-- <div class="dropdown" style="float:right;"> -->
-<!-- <span class="col-lg-12" style="display:inline-block; float:left;"> -->
-<!-- <div class="col-lg-3"> -->
-<!-- <div class="ui-widget" aria-haspopup="true"> -->
-
-<!-- </div>  -->
-<!-- </div> -->
-<!-- <div class="col-lg-2"> -->
-
 <div id="mapid" style="width: 800px; height: 500px;"></div>
 
 </body>
 <script>
-	function search($this){
-	    var text = $("#tags").val();
-	    //alert(text)
-        $.ajax({
-            url : '/web/court_new/address.php',
-            type : 'POST',
-	     	dataType : 'json',
-            data : {text : text},
-            success : function(data){
-         			$( "#tags" ).autocomplete({
-    			      source: data
-    			    });
-            }
-        });
-	    return false;
-	}
-
-  var d_id = 0;
-  var x = 0;
-  var y = 0;
-  var center = 0;
-  var zoom = 12;
-  geoLayer = L.geoJson();
-  marker = 0;
-
-  function onLayerClick(e){
-    x = e.latlng;
-    map.removeLayer(marker);
-    console.log(e);
-    map.eachLayer(function(layer){
-      if(layer.options.opacity == "0.5"){
-        layer.options.opacity = '0.0';
-        layer.options.fillOpacity = '0.0';
-        map.removeLayer(layer);
-        layer.addTo(map);
-      }
-    });
-    //console.log(geoLayer[e.layer.feature.properties.id]._layers)
-    //for (var i = 20; i >= 1; i--) {
-    //geoLayer[i]
-    i = e.layer.feature.properties.id;
-    for (key in geoLayer[i]._layers) {
-      layer = geoLayer[i]._layers[key];
-      map.removeLayer(layer);
-      layer.options.fillOpacity="0.5";
-      layer.options.opacity="0.5";
-      layer.addTo(map);
-      //console.log(key)
-    };
-    //};
-    //console.log(map);
-    layer = e.layer;
-    //console.log(e.layer);
-    /*map.removeLayer(e.layer);
-    e.layer.options.fillOpacity="0.5";
-    e.layer.options.opacity="0.5";
-    layer.addTo(map);*/
-}
-
-  function search_district(){
-      var text = $("#tags").val();
-        $.ajax({
-            url : '/web/court_new/district.php',
-            type : 'POST',
-        dataType : 'json',
-            data : {text : text},
-            success : function(data){
-              map.removeLayer(marker);
-              map.removeLayer(geoLayer);
-              geoLayer.clearLayers();
-              geoLayer = L.geoJson(data);
-              bounds = geoLayer.getBounds();
-              geoLayer.on('click', onLayerClick);
-              geoLayer.addTo(map).bindPopup('<button class="btn btn-primary" id="court" type="button" onclick="court(this)" x="'+data.features[0].properties.x+'" y="'+data.features[0].properties.y+'" info="'+data.features[0].properties.info+'" ">Показать здание суда</button>');
-              map.fitBounds(bounds);
-            }
-        });
-      return false;
-  }
-
-
-  function s_district(){
-      var text = $("#tags").val();
-        $.ajax({
-            url : '/web/court_new/district.php',
-            type : 'POST',
-        dataType : 'json',
-            data : {text : text},
-            success : function(data){
-              console.log(data);
-              //data = data[0];
-              console.log(geoLayer[data]);
-              map.removeLayer(marker);
-              map.eachLayer(function(layer){
-                  if(layer.options.opacity == "0.5"){
-                    layer.options.opacity = '0.0';
-                    layer.options.fillOpacity = '0.0';
-                    map.removeLayer(layer);
-                    layer.addTo(map);
-                  }
-              });
-              district(data,view_style);
-              /*layer = geoLayer[data];
-              //map.removeLayer(layer);
-              layer.options.fillOpacity="0.5";
-              layer.options.opacity="0.5";
-              geoLayer[data].addTo(map);*/
-            }
-        });
-      return false;
-  }
-
-
-  function court(){
-      console.log($("#court").attr('x'));
-      /*map.remove();
-      map = L.map('mapid').setView([geoLayer.properties.x, geoLayer.properties.y],8);*/
-      marker = L.marker([$("#court").attr('y'), $("#court").attr('x')]).addTo(map).bindPopup("<b>"+$("#court").attr('info')+"<br><a href="+'"'+$("#court").attr('site')+'"'+">"+$("#court").attr('site')+"</a></b><br><button class='btn btn-primary' id='court' type='button' onclick='view()'>Вернуться к границам</button>").openPopup();
-      map.panTo([$("#court").attr('y'), $("#court").attr('x')]);
-      return false;
-  }
-
-  function view(){
-    map.panTo(x);
-  }
-
-  geoLayer[1] = L.geoJson();
-  geoLayer[2] = L.geoJson();
-  geoLayer[3] = L.geoJson();
-  geoLayer[4] = L.geoJson();
-  geoLayer[5] = L.geoJson();
-  geoLayer[6] = L.geoJson();
-  geoLayer[7] = L.geoJson();
-  geoLayer[8] = L.geoJson();
-  geoLayer[9] = L.geoJson();
-  geoLayer[10] = L.geoJson();
-  geoLayer[11] = L.geoJson();
-  geoLayer[12] = L.geoJson();
-  geoLayer[13] = L.geoJson();
-  geoLayer[15] = L.geoJson();
-  geoLayer[14] = L.geoJson();
-  geoLayer[16] = L.geoJson();
-  geoLayer[17] = L.geoJson();
-  geoLayer[18] = L.geoJson();
-  geoLayer[19] = L.geoJson();
-  geoLayer[20] = L.geoJson();
-
-  function style(data) {
-    return {fillColor: data.features[0].properties.color, color:"blue", fillOpacity: '0.0', opacity:"0.0"}
-  }
-
-  function view_style(data) {
-    return {fillColor: data.features[0].properties.color, color:"blue", fillOpacity: '0.5', opacity:"0.5"}
-  }
-
-  function district(id, style){
-        $.ajax({
-            url : '/web/court_new/district_s.php',
-            type : 'POST',
-        dataType : 'json',
-            data : {id : id},
-            success : function(data){
-              //map.removeLayer(marker);
-              //map.removeLayer(geoLayer);
-              //geoLayer.clearLayers();
-              geoLayer[id] = L.geoJson(data, {style: style(data)});
-              //bounds = geoLayer[id].getBounds();
-              geoLayer[id].on('click', onLayerClick);
-              geoLayer[id].addTo(map).bindPopup(data.features[0].properties.title+'<br><button class="btn btn-primary" id="court" type="button" onclick="court(this)" x="'+data.features[0].properties.x+'" y="'+data.features[0].properties.y+'" info="'+data.features[0].properties.info+'" site="'+data.features[0].properties.site+'">Показать здание суда</button>');
-              //map.fitBounds(bounds);
-              //console.log(data.features[1].geometry.coordinates[0].length);
-              /*for (var i = data.features[0].geometry.coordinates[0].length - 1; i >= 0; i--) {
-                L.marker([data.features[0].geometry.coordinates[0][i][1], data.features[0].geometry.coordinates[0][i][0]]).addTo(map).bindPopup(data.features[0].geometry.coordinates[0][i][1]+","+data.features[0].geometry.coordinates[0][i][0])
-              }*/
-            }
-        });
-      return false;
-  }
-
-
-/*  L.CRS.Wall = L.extend({}, L.CRS.Simple, {
-  transformation: new L.Transformation(128, 128, 128, 128),
-});*/
-/*  var sol = L.latLng([-84.76514, 204.52197]);
-L.marker(sol).addTo(map);*/
-
-
-
-/*var layer = L.tileLayer.bing('Av2r6HgUWUOTKlQY7Jw6JoA4UbiW3itsfXUP-jTMTruE9KM5B99dz7Km3gPgsoMD')
-layer.addTo(map)*/
-count_d = 20;
-district(1, view_style);
-district(2, view_style);
-district(3, view_style);
-district(4, view_style);
-district(5, view_style);
-district(6, view_style);
-district(7, view_style);
-district(8, view_style);
-district(9, view_style);
-district(10, view_style);
-district(11, view_style);
-district(12, view_style);
-district(13, view_style);
-district(15, view_style);
-district(14, view_style);
-district(16, view_style);
-district(17, view_style);
-district(18, view_style);
-district(19, view_style);
-district(20, view_style);
-
+var marker = 0;
 var map = L.map('mapid',{crs: L.CRS.Simple,
   minZoom: 11
-}).setView([-84.76514, 204.52197], 12)
-/*var bounds = [[-84.58008, 204.24805], [-84.94873, 204.75439]];
-map.fitBounds(bounds);*/
+}).setView([-84.76514, 204.52197], 12);
 
-/*function onMapClick(e) {
-    L.popup()
-        .setLatLng(e.latlng)
-        .setContent("You clicked the map at " + e.latlng.toString())
-        .openOn(map);
-}
-map.on('click', onMapClick);*/
+   <!--var marker = new google.maps.Marker({-->
+                <!--position: {lat: 204.53278, lng: -84.77593},-->
+                <!--map: map,-->
+                <!--title: "test"-->
+            <!--});-->
+
 
 var layer = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
       maxZoom: 20,
@@ -284,105 +48,90 @@ var layer = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
       subdomains:['mt0','mt1','mt2','mt3'],
       //bounds:[[0,0], [256,256]]
   });
+
+ map.on('click', get_click_position);
   center = map.getCenter();
   layer.addTo(map);
-  map.on('click', onLayerClick);
 
-var setHybrib = function(){
-  //console.log(bound)
-  //console.log(map.getCenter());
-  center = map.getCenter();
-  zoom = map.getZoom();
-  /*for (var i = geoLayer.length - 1; i >= 0; i--) {
-    geoLayer[i].addTo(map);
-  }*/
-  //layers = geoLayer;
-  map.remove()
-  map = L.map('mapid', {
-    crs: L.CRS.Simple
-  }).setView(center, zoom)
-  //map = L.map('mapid').fitBounds(bound)
-  //map.setZoom(6)
-  //map.fitBounds(bound);
+ function get_click_position(event){
+  console.log(event);
+            var location = event.latlng;
+            console.log(location);
 
-  //console.log(geoLayer.length);
-  for (var i = count_d; i > 0; i--) {
-    geoLayer[i].addTo(map);
-  }
-  var layer = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
-      maxZoom: 20,
-      subdomains:['mt0','mt1','mt2','mt3']
-  });
-  //center = map.getCenter();
-  layer.addTo(map);
-  //layers.addTo(map);
-  //map.on('focus', onLayerClick);
-}
+            var lat = location.lat;
+            var lng = location.lng;
+            App.handle(lat, lng);
 
-var setSatellite = function(){
-  center = map.getCenter();
-  zoom = map.getZoom();
-  map.remove()
-  map = L.map('mapid', {
-    crs: L.CRS.Simple
-  }).setView(center, zoom)
-  for (var i = count_d; i > 0; i--) {
-    geoLayer[i].addTo(map);
-  }
-  var layer = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
-      maxZoom: 20,
-      subdomains:['mt0','mt1','mt2','mt3']
-  });
-  layer.addTo(map);
-}
+        }
 
-var setStreet = function(){
-  center = map.getCenter();
-  zoom = map.getZoom();
-  map.remove()
-  map = L.map('mapid', {
-    crs: L.CRS.Simple
-  }).setView(center, zoom)
-  for (var i = count_d; i > 0; i--) {
-    geoLayer[i].addTo(map);
-  }
-  var layer = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
-      maxZoom: 20,
-      subdomains:['mt0','mt1','mt2','mt3']
-  });
-  layer.addTo(map);
-}
+        function setMarkerPosition(lat, lng) {
+         <!--marker = L.marker([lat,lng]).addTo(map);-->
+            <!--var clickLatLng = new google.maps.LatLng(lat, lng);-->
+            <!--marker.setPosition(clickLatLng);-->
 
-var setTerrain = function(){
-  center = map.getCenter();
-  zoom = map.getZoom();
-  map.remove()
-  map = L.map('mapid', {
-    crs: L.CRS.Simple
-  }).setView(center, zoom)
-  for (var i = count_d; i > 0; i--) {
-    geoLayer[i].addTo(map);
-  }
-  var layer = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',{
-      maxZoom: 20,
-      subdomains:['mt0','mt1','mt2','mt3']
-  });
-  layer.addTo(map);
-}
+        }
 
-var setBing = function(){
-  center = map.getCenter();
-  zoom = map.getZoom();
-  map.remove()
-  map = L.map('mapid', {
-    crs: L.CRS.Simple
-  }).setView(center, zoom)
-  for (var i = count_d; i > 0; i--) {
-    geoLayer[i].addTo(map);
-  }
-  var layer = L.tileLayer.bing('Av2r6HgUWUOTKlQY7Jw6JoA4UbiW3itsfXUP-jTMTruE9KM5B99dz7Km3gPgsoMD')
-  layer.addTo(map)
-}
+        function addPoligon(poligon){
+            App.showJSLog(poligon.length);
+            for(i=0;i<poligon.length;i++){
+                App.showJSLog(poligon[i].lat+" "+ poligon[i].lng);
+                 marker = L.marker([poligon[i].lat,poligon[i].lng]).addTo(map);
+                 marker.on('click',clickMark);
+            }
+            L.polygon(poligon).addTo(map);
+        }
+        function clickMark(e){
+            App.showJSLog("clickMarker " + e.latlng.lat);
+        }
+
+        <!--function startJumping(){-->
+            <!--marker.setAnimation(google.maps.Animation.BOUNCE);-->
+        <!--}-->
+
+        <!--function stopJumping(){-->
+            <!--marker.setAnimation(google.maps.Animation.BOUNCE);-->
+        <!--}-->
+
+        <!--function setMapCenter(lat, lng) {-->
+            <!--var latlng = new google.maps.LatLng(lat, lng);-->
+            <!--map.setCenter(latlng);-->
+        <!--}-->
+
+        <!--function switchSatellite() {-->
+            <!--var mapOptions = {-->
+                <!--mapTypeId: google.maps.MapTypeId.SATELLITE-->
+            <!--};-->
+            <!--map.setOptions(mapOptions);-->
+            <!--setLightMarkerIcon();-->
+        <!--}-->
+
+        <!--function switchRoadmap() {-->
+            <!--var mapOptions = {-->
+                <!--mapTypeId: google.maps.MapTypeId.ROADMAP-->
+            <!--};-->
+            <!--map.setOptions(mapOptions);-->
+            <!--setDarkMarkerIcon();-->
+        <!--}-->
+
+        <!--function switchHybrid() {-->
+            <!--var mapOptions = {-->
+                <!--mapTypeId: google.maps.MapTypeId.HYBRID-->
+            <!--};-->
+            <!--map.setOptions(mapOptions);-->
+            <!--setLightMarkerIcon();-->
+        <!--}-->
+
+        <!--function switchTerrain() {-->
+            <!--var mapOptions = {-->
+                <!--mapTypeId: google.maps.MapTypeId.TERRAIN-->
+            <!--};-->
+            <!--map.setOptions(mapOptions);-->
+            <!--setDarkMarkerIcon();-->
+        <!--}-->
+
+
+<!--var defLatLng = new google.maps.LatLng(204.53278, -84.77593);-->
+
 
 
 
