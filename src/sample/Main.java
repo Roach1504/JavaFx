@@ -91,7 +91,7 @@ public class Main extends Application {
         poligon.add(p3);
         JSONArray jsonArray = new JSONArray(poligon);
         System.out.println(jsonArray.toString());
-        invokeJS("addPoligon(" + jsonArray.toString() + ")");
+        //invokeJS("addPoligon(" + jsonArray.toString() + ")");
 
     }
 
@@ -127,7 +127,7 @@ public class Main extends Application {
         String sLat = Double.toString(lat);
         String sLng = Double.toString(lng);
         System.out.println("WIN java "+sLat + ", "+ sLng);
-        invokeJS("setMarkerPosition(" + sLat + ", " + sLng + ")");
+//        invokeJS("setMarkerPosition(" + sLat + ", " + sLng + ")");
     }
 
 //    public void setMapCenter(double lat, double lng) {
