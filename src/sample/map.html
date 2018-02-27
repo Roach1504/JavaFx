@@ -81,9 +81,7 @@
             <!--}-->
             <!--L.polygon(poligon).addTo(map);-->
         <!--}-->
-        <!--function clickMark(e){-->
-            <!--App.showJSLog("clickMarker " + e.latlng.lat);-->
-        <!--}-->
+
 
 
 
@@ -2026,10 +2024,14 @@
 
 }, window));
 
-var startPoint = [43.1249, 1.254];
-var map = L.map('map', {editable: true}).setView(startPoint, 16),
-    tilelayer = L.tileLayer('http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-     {maxZoom: 20, attribution: 'Data \u00a9 <a href="http://www.openstreetmap.org/copyright"> OpenStreetMap Contributors </a> Tiles \u00a9 HOT'}).addTo(map);
+var startPoint = [-84.76514, 204.52197];
+var map = L.map('map', {editable: true, crs: L.CRS.Simple, minZoom: 11}).setView(startPoint, 12),
+    tilelayer = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',
+     {maxZoom: 20, minZoom: 2,
+      attribution: 'Data \u00a9 <a href="http://www.openstreetmap.org/copyright"> OpenStreetMap Contributors </a> Tiles \u00a9 HOT',
+        subdomains:['mt0','mt1','mt2','mt3']}).addTo(map);
+
+
 
     L.EditControl = L.Control.extend({
 
@@ -2055,8 +2057,7 @@ var map = L.map('map', {editable: true}).setView(startPoint, 16),
         }
 
     });
-
-    <!--L.NewLineControl = L.EditControl.extend({-->
+     <!--L.NewLineControl = L.EditControl.extend({-->
 
         <!--options: {-->
             <!--position: 'topleft',-->
@@ -2067,88 +2068,16 @@ var map = L.map('map', {editable: true}).setView(startPoint, 16),
 
     <!--});-->
 
-
-
-
-
-L.NewPolygonControl = L.EditControl.extend({
+    L.NewPolygonControl = L.EditControl.extend({
 
         options: {
             position: 'topleft',
+            callback: map.editTools.startPolygon,
             kind: 'polygon',
-            html: 'test'
+            html: '▰'
         }
 
     });
-
-  var multi = L.polygon([
-      [
-        [
-          [43.1239, 1.244],
-          [43.123, 1.253],
-          [43.1252, 1.255],
-          [43.1250, 1.251],
-          [43.1239, 1.244]
-        ],
-        [
-          [43.124, 1.246],
-          [43.1236, 1.248],
-          [43.12475, 1.250]
-        ],
-        [
-          [43.124, 1.251],
-          [43.1236, 1.253],
-          [43.12475, 1.254]
-        ]
-      ],
-      [
-        [
-          [43.1269, 1.246],
-          [43.126, 1.252],
-          [43.1282, 1.255],
-          [43.1280, 1.245]
-        ]
-      ]
-    ]).addTo(map);
-    multi.enableEdit();
-    multi.on('dblclick', L.DomEvent.stop).on('dblclick', multi.toggleEdit);
-    multi.bindPopup('hi!');
-
-    var poly = L.polygon([
-      [
-        [43.1239, 1.259],
-        [43.123, 1.263],
-        [43.1252, 1.265],
-        [43.1250, 1.261]
-      ],
-      [
-        [43.124, 1.263],
-        [43.1236, 1.261],
-        [43.12475, 1.262]
-      ]
-    ]).addTo(map);
-    poly.enableEdit();
-    poly.on('dblclick', L.DomEvent.stop).on('dblclick', poly.toggleEdit);
-
-    var rec = L.rectangle([
-        [43.1235, 1.255],
-        [43.1215, 1.259]
-    ]).addTo(map);
-    rec.enableEdit();
-
-    rec.on('dblclick', L.DomEvent.stop).on('dblclick', rec.toggleEdit);
-
-    var circle = L.circle([43.1220, 1.250], {radius: 100}).addTo(map);
-    circle.enableEdit();
-    circle.on('dblclick', L.DomEvent.stop).on('dblclick', circle.toggleEdit);
-
-    var line = L.polyline([
-        [43.1292, 1.256],
-        [43.1295, 1.259],
-        [43.1291, 1.261]
-    ]).addTo(map);
-    line.enableEdit();
-    line.on('dblclick', L.DomEvent.stop).on('dblclick', line.toggleEdit);
 
     <!--L.NewMarkerControl = L.EditControl.extend({-->
 
@@ -2182,6 +2111,99 @@ L.NewPolygonControl = L.EditControl.extend({
         <!--}-->
 
     <!--});-->
+
+  <!--var multi = L.polygon([-->
+      <!--[-->
+        <!--[-->
+          <!--[43.1239, 1.244],-->
+          <!--[43.123, 1.253],-->
+          <!--[43.1252, 1.255],-->
+          <!--[43.1250, 1.251],-->
+          <!--[43.1239, 1.244]-->
+        <!--],-->
+        <!--[-->
+          <!--[43.124, 1.246],-->
+          <!--[43.1236, 1.248],-->
+          <!--[43.12475, 1.250]-->
+        <!--],-->
+        <!--[-->
+          <!--[43.124, 1.251],-->
+          <!--[43.1236, 1.253],-->
+          <!--[43.12475, 1.254]-->
+        <!--]-->
+      <!--],-->
+      <!--[-->
+        <!--[-->
+          <!--[43.1269, 1.246],-->
+          <!--[43.126, 1.252],-->
+          <!--[43.1282, 1.255],-->
+          <!--[43.1280, 1.245]-->
+        <!--]-->
+      <!--]-->
+    <!--]).addTo(map);-->
+    <!--multi.enableEdit();-->
+    <!--multi.on('dblclick', L.DomEvent.stop).on('dblclick', multi.toggleEdit);-->
+    <!--multi.bindPopup('hi!');-->
+    function clickMap(e){
+         App.showJSLog("position = " + e.latlng);
+         App.test();
+                  App.showJSLog("0");
+    }
+        map.on('click',clickMap);
+
+<!--var poly=0;-->
+
+    function addPolygon (polygon) {
+         App.showJSLog("0.1");
+    App.showJSLog("polygon = " + polygon.length);
+             <!--App.showJSLog("polygon" + polygon);-->
+        var poly = L.polygon(polygon,
+        {color: 'red',fillColor: '#f03',   fillOpacity: 0.5}).addTo(map);
+         App.showJSLog("1");
+        <!--poly.enableEdit();-->
+                 App.showJSLog("2");
+        poly.on('dblclick', L.DomEvent.stop).on('dblclick', poly.toggleEdit);
+              App.showJSLog("3");
+
+        poly.bindPopup('QWERTY');
+        App.showPolygon('['+poly.toGeoJSON().geometry.coordinates+']');
+         App.showJSLog("4");
+        <!--poly.on('click',getPolygon);-->
+    }
+
+    function getPolygon(poly){
+        App.showPolygon(poly.toGeoJSON());
+    }
+
+    <!--var poly = L.polygon([-->
+
+        <!--[-84.77593,204.53278],-->
+        <!--[-84.767822265625,204.527099609375],-->
+        <!--[-84.773193359375,204.50634765625]-->
+
+    <!--]).addTo(map);-->
+
+    <!--var rec = L.rectangle([-->
+        <!--[43.1235, 1.255],-->
+        <!--[43.1215, 1.259]-->
+    <!--]).addTo(map);-->
+    <!--rec.enableEdit();-->
+
+    <!--rec.on('dblclick', L.DomEvent.stop).on('dblclick', rec.toggleEdit);-->
+
+    <!--var circle = L.circle([43.1220, 1.250], {radius: 100}).addTo(map);-->
+    <!--circle.enableEdit();-->
+    <!--circle.on('dblclick', L.DomEvent.stop).on('dblclick', circle.toggleEdit);-->
+
+    <!--var line = L.polyline([-->
+        <!--[43.1292, 1.256],-->
+        <!--[43.1295, 1.259],-->
+        <!--[43.1291, 1.261]-->
+    <!--]).addTo(map);-->
+    <!--line.enableEdit();-->
+    <!--line.on('dblclick', L.DomEvent.stop).on('dblclick', line.toggleEdit);-->
+
+
 
 
     <!--map.addControl(new L.NewMarkerControl());-->

@@ -1,6 +1,8 @@
 package sample;
 
 
+import api.Network;
+import cn.javaer.retrofit2.converter.jaxb.JaxbConverterFactory;
 import javafx.application.Application;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.value.ChangeListener;
@@ -13,26 +15,74 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import netscape.javascript.JSObject;
+import okhttp3.ResponseBody;
 import org.json.JSONArray;
+import org.json.JSONObject;
+import retrofit2.*;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+//                [-84.77593,204.53278],
+//                [-84.767822265625,204.527099609375],
+//                [-84.773193359375,204.50634765625]
 
 
-
-public class Main extends Application {
+public class Main extends Application implements PolygonMVP{
 
     private boolean ready;
     WebEngine webEngine;
     WebView browser;
 
+
+    private static Network umoriliApi;
+    private Retrofit retrofit;
+
+    public static Network getApi() {
+        return umoriliApi;
+    }
+    String response = null;
+
+    public void test(){
+
+        Prezentr prezentr = new Prezentr(this);
+
+        System.out.println("Start TEST");
+        for(int i=1; i<=20;) {
+            System.out.println("1");
+            prezentr.test(i);
+            System.out.println("2");
+            boolean a = true;
+            System.out.println("3");
+            while (a) {
+                System.out.println("4");
+                if (response != null) {
+                    System.out.println("5");
+
+                    invokeJS("addPolygon(" + response+")");
+                    System.out.println("6");
+
+                    a = false;
+                    i++;
+                }
+            }
+        }
+
+    }
     @Override
     public void start(Stage stage) throws Exception{
+        retrofit = new Retrofit.Builder()
+                .baseUrl("http://109.120.189.141:81")
+                .addConverterFactory(JaxbConverterFactory.create())
+                .build();
+        umoriliApi = retrofit.create(Network.class);
+
 
         browser = new WebView();
         webEngine = browser.getEngine();
         webEngine.load(getClass().getResource("map.html").toExternalForm());
+
         VBox root = new VBox();
         root.getChildren().addAll(browser);
         Scene scene = new Scene(root);
@@ -41,6 +91,7 @@ public class Main extends Application {
         stage.setWidth(800);
         stage.setHeight(500);
         stage.show();
+
         webEngine.getLoadWorker().stateProperty().addListener(new ChangeListener<Worker.State>()
         {
             @Override
@@ -55,6 +106,7 @@ public class Main extends Application {
             }
         });
         initCommunication();
+
     }
     private JSObject doc;
 
@@ -73,25 +125,32 @@ public class Main extends Application {
                 }
             }
         });
-        addPoligone();
+
+        addPolygon();
     }
 
     public void showJSLog(String message){
         System.out.println("JS ERROR: "+message);
     }
 
+    public void showPolygon(String polygon){
+        JSONArray polygons = new JSONArray(polygon);
+        System.out.println("Polygon return: "+polygons.toString());
+    }
 
-    public void addPoligone(){
-        List<Point> poligon = new ArrayList<>();
-        Point p1 = new Point(-84.77593, 204.53278 );
-        Point p2 = new Point(-84.767822265625, 204.527099609375);
-        Point p3 = new Point(-84.773193359375, 204.50634765625);
-        poligon.add(p1);
-        poligon.add(p2);
-        poligon.add(p3);
-        JSONArray jsonArray = new JSONArray(poligon);
-        System.out.println(jsonArray.toString());
-        //invokeJS("addPoligon(" + jsonArray.toString() + ")");
+
+
+    public void addPolygon(){
+//        List<Point> polygon = new ArrayList<>();
+//        Point p1 = new Point("-84.77593", "204.53278" );
+//        Point p2 = new Point("-84.767822265625", "204.527099609375");
+//        Point p3 = new Point("-84.773193359375", "204.50634765625");
+//        polygon.add(p1);
+//        polygon.add(p2);
+//        polygon.add(p3);
+//        JSONArray jsonArray = new JSONArray(polygon);
+//        System.out.println("test poligon cread: "+jsonArray.toString());
+ //       invokeJS("addPolygon(" + jsonArray.toString() +")");
 
     }
 
@@ -102,7 +161,7 @@ public class Main extends Application {
 
 
 
-    private void invokeJS(final String str) {
+    private void invokeJS( String str) {
         if(ready) {
             doc.eval(str);
         }
@@ -130,49 +189,15 @@ public class Main extends Application {
 //        invokeJS("setMarkerPosition(" + sLat + ", " + sLng + ")");
     }
 
-//    public void setMapCenter(double lat, double lng) {
-//        String sLat = Double.toString(lat);
-//        String sLng = Double.toString(lng);
-//        invokeJS("setMapCenter(" + sLat + ", " + sLng + ")");
-//    }
-//
-//    public void switchSatellite() {
-//        invokeJS("switchSatellite()");
-//    }
-//
-//    public void switchRoadmap() {
-//        invokeJS("switchRoadmap()");
-//    }
-//
-//    public void switchHybrid() {
-//        invokeJS("switchHybrid()");
-//    }
-//
-//    public void switchTerrain() {
-//        invokeJS("switchTerrain()");
-//    }
-//
-//    public void startJumping() {
-//        invokeJS("startJumping()");
-//    }
-//
-//    public void stopJumping() {
-//        invokeJS("stopJumping()");
-//    }
-//
-//    public void setHeight(double h) {
-//        browser.setPrefHeight(h);
-//    }
-//
-//    public void setWidth(double w) {
-//        browser.setPrefWidth(w);
-//    }
-//
-//    public ReadOnlyDoubleProperty widthProperty() {
-//        return browser.widthProperty();
-//    }
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    @Override
+    public void test(String poligon) {
+        System.out.println("MVP Start");
+        response = poligon;
+
     }
 }

@@ -4,19 +4,19 @@ package sample;
  * Created by Android on 26.02.2018.
  */
 public class Point {
-    double lat;
-    double lng;
+    String lat;
+    String lng;
 
-    public Point(double lat, double lng) {
+    public Point(String lat, String lng) {
         this.lat = lat;
         this.lng = lng;
     }
 
-    public double getLat() {
+    public String getLat() {
         return lat;
     }
 
-    public double getLng() {
+    public String getLng() {
         return lng;
     }
 }
