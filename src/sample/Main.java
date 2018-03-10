@@ -20,13 +20,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import retrofit2.*;
 
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-//                [-84.77593,204.53278],
-//                [-84.767822265625,204.527099609375],
-//                [-84.773193359375,204.50634765625]
 
 
 public class Main extends Application implements PolygonMVP{
@@ -44,31 +39,43 @@ public class Main extends Application implements PolygonMVP{
     }
     String response = null;
 
-    public void test(){
+    public void test1(String test) {
+        List<Propertes> propertesList = new ArrayList<>();
+        System.out.println("JS respons: " + test);
+        JSONObject geo = new JSONObject(test);
+        JSONArray features = geo.getJSONArray("features");
 
-        Prezentr prezentr = new Prezentr(this);
 
-        System.out.println("Start TEST");
-        for(int i=1; i<=20;) {
-            System.out.println("1");
-            prezentr.test(i);
-            System.out.println("2");
-            boolean a = true;
-            System.out.println("3");
-            while (a) {
-                System.out.println("4");
-                if (response != null) {
-                    System.out.println("5");
-
-                    invokeJS("addPolygon(" + response+")");
-                    System.out.println("6");
-
-                    a = false;
-                    i++;
-                }
+        for (int i = 0; i < features.length(); i++) {
+            JSONObject feature = new JSONObject(features.get(i));
+            JSONObject properties = features.getJSONObject(i).getJSONObject("properties");
+            Point point = new Point(properties.getString("y"), properties.getString("x"));
+            Propertes propertes = new Propertes(
+                    properties.getString("id"),
+                    properties.getString("info"),
+                    properties.getString("title"),
+                    properties.getString("site"),
+                    properties.getString("color"),
+                    point);
+            propertesList.add(propertes);
+    System.out.println();
+            JSONObject geometry = features.getJSONObject(i).getJSONObject("geometry");
+            JSONArray coordinates = geometry.getJSONArray("coordinates");
+            System.out.println("coordinates: " + coordinates.get(0).toString());
+            JSONArray mass = new JSONArray(coordinates.get(0).toString());
+            List<Point> pointList = new ArrayList<>();
+            for (int j = 0; j < mass.length(); j++) {
+                //System.out.println("test "+mass.get(j));
+                JSONArray masss = new JSONArray(mass.get(j).toString());
+                Point a = new Point(masss.getString(1), masss.getString(0));
+                //System.out.println("lat " + a.lat + " lng " + a.lng);
+                pointList.add(a);
             }
-        }
+            JSONArray poli = new JSONArray(pointList);
 
+            invokeJS("addPolygon(" + poli+","+"\'"+propertesList.get(i).getColor()+"\'"+")");
+
+        }
     }
     @Override
     public void start(Stage stage) throws Exception{
@@ -138,9 +145,10 @@ public class Main extends Application implements PolygonMVP{
         System.out.println("Polygon return: "+polygons.toString());
     }
 
-
-
     public void addPolygon(){
+        for(int i=1; i<=20; i++) {
+            invokeJS("reqestJS(" + i + ")");
+        }
 //        List<Point> polygon = new ArrayList<>();
 //        Point p1 = new Point("-84.77593", "204.53278" );
 //        Point p2 = new Point("-84.767822265625", "204.527099609375");

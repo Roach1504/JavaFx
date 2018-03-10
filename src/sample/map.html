@@ -2057,16 +2057,7 @@ var map = L.map('map', {editable: true, crs: L.CRS.Simple, minZoom: 11}).setView
         }
 
     });
-     <!--L.NewLineControl = L.EditControl.extend({-->
 
-        <!--options: {-->
-            <!--position: 'topleft',-->
-            <!--callback: map.editTools.startPolyline,-->
-            <!--kind: 'line',-->
-            <!--html: '\\/\\'-->
-        <!--}-->
-
-    <!--});-->
 
     L.NewPolygonControl = L.EditControl.extend({
 
@@ -2079,95 +2070,61 @@ var map = L.map('map', {editable: true, crs: L.CRS.Simple, minZoom: 11}).setView
 
     });
 
-    <!--L.NewMarkerControl = L.EditControl.extend({-->
 
-        <!--options: {-->
-            <!--position: 'topleft',-->
-            <!--callback: map.editTools.startMarker,-->
-            <!--kind: 'marker',-->
-            <!--html: '🖈'-->
-        <!--}-->
+    function getURL(url, callback) {
+  var req = new XMLHttpRequest();
+  req.open("POST", url, true);
+  req.addEventListener("load", function() {
+    if (req.status < 400)
+      callback(req.responseText);
+    else
+      callback(null, new Error("Request failed: " +
+                               req.statusText));
+  });
+  req.addEventListener("error", function() {
+    callback(null, new Error("Network error"));
+  });
+  req.send(null);
+}
 
-    <!--});-->
+function reqestJS(id){
 
-    <!--L.NewRectangleControl = L.EditControl.extend({-->
+var http = new XMLHttpRequest();
+var url = "http://109.120.189.141:81/web/court_new/district_s.php";
+var params = "id="+id;
+http.open("POST", url, true);
 
-        <!--options: {-->
-            <!--position: 'topleft',-->
-            <!--callback: map.editTools.startRectangle,-->
-            <!--kind: 'rectangle',-->
-            <!--html: '⬛'-->
-        <!--}-->
+//Send the proper header information along with the request
+http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
-    <!--});-->
+http.onreadystatechange = function() {//Call a function when the state changes.
+    if(http.readyState == 4 && http.status == 200) {
+        App.test1(http.responseText);
+    }
+}
 
-    <!--L.NewCircleControl = L.EditControl.extend({-->
+http.send(params);
+}
 
-        <!--options: {-->
-            <!--position: 'topleft',-->
-            <!--callback: map.editTools.startCircle,-->
-            <!--kind: 'circle',-->
-            <!--html: '⬤'-->
-        <!--}-->
-
-    <!--});-->
-
-  <!--var multi = L.polygon([-->
-      <!--[-->
-        <!--[-->
-          <!--[43.1239, 1.244],-->
-          <!--[43.123, 1.253],-->
-          <!--[43.1252, 1.255],-->
-          <!--[43.1250, 1.251],-->
-          <!--[43.1239, 1.244]-->
-        <!--],-->
-        <!--[-->
-          <!--[43.124, 1.246],-->
-          <!--[43.1236, 1.248],-->
-          <!--[43.12475, 1.250]-->
-        <!--],-->
-        <!--[-->
-          <!--[43.124, 1.251],-->
-          <!--[43.1236, 1.253],-->
-          <!--[43.12475, 1.254]-->
-        <!--]-->
-      <!--],-->
-      <!--[-->
-        <!--[-->
-          <!--[43.1269, 1.246],-->
-          <!--[43.126, 1.252],-->
-          <!--[43.1282, 1.255],-->
-          <!--[43.1280, 1.245]-->
-        <!--]-->
-      <!--]-->
-    <!--]).addTo(map);-->
-    <!--multi.enableEdit();-->
-    <!--multi.on('dblclick', L.DomEvent.stop).on('dblclick', multi.toggleEdit);-->
-    <!--multi.bindPopup('hi!');-->
     function clickMap(e){
          App.showJSLog("position = " + e.latlng);
-         App.test();
                   App.showJSLog("0");
     }
         map.on('click',clickMap);
 
-<!--var poly=0;-->
 
-    function addPolygon (polygon) {
-         App.showJSLog("0.1");
+    function addPolygon (polygon, colorp) {
+
+         App.showJSLog(colorp);
+
     App.showJSLog("polygon = " + polygon.length);
-             <!--App.showJSLog("polygon" + polygon);-->
         var poly = L.polygon(polygon,
-        {color: 'red',fillColor: '#f03',   fillOpacity: 0.5}).addTo(map);
-         App.showJSLog("1");
+        {color: 'blue' ,fillColor: colorp,   fillOpacity: 0.5}).addTo(map);
         <!--poly.enableEdit();-->
-                 App.showJSLog("2");
         poly.on('dblclick', L.DomEvent.stop).on('dblclick', poly.toggleEdit);
-              App.showJSLog("3");
 
         poly.bindPopup('QWERTY');
         App.showPolygon('['+poly.toGeoJSON().geometry.coordinates+']');
-         App.showJSLog("4");
         <!--poly.on('click',getPolygon);-->
     }
 
