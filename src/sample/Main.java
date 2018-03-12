@@ -20,7 +20,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import retrofit2.*;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 
@@ -41,7 +43,6 @@ public class Main extends Application implements PolygonMVP{
 
     public void test1(String test) {
         List<Propertes> propertesList = new ArrayList<>();
-        System.out.println("JS respons: " + test);
         JSONObject geo = new JSONObject(test);
         JSONArray features = geo.getJSONArray("features");
 
@@ -58,10 +59,9 @@ public class Main extends Application implements PolygonMVP{
                     properties.getString("color"),
                     point);
             propertesList.add(propertes);
-    System.out.println();
+
             JSONObject geometry = features.getJSONObject(i).getJSONObject("geometry");
             JSONArray coordinates = geometry.getJSONArray("coordinates");
-            System.out.println("coordinates: " + coordinates.get(0).toString());
             JSONArray mass = new JSONArray(coordinates.get(0).toString());
             List<Point> pointList = new ArrayList<>();
             for (int j = 0; j < mass.length(); j++) {
@@ -71,11 +71,9 @@ public class Main extends Application implements PolygonMVP{
                 //System.out.println("lat " + a.lat + " lng " + a.lng);
                 pointList.add(a);
             }
-            JSONArray poli = new JSONArray(pointList);
-
-            invokeJS("addPolygon(" + poli+","+"\'"+propertesList.get(i).getColor()+"\'"+")");
-
-        }
+            JSONArray poly = new JSONArray(pointList);
+                invokeJS("addPolygon(" +poly + "," + "\'" + propertesList.get(i).getColor() + "\'" + ")");
+         }
     }
     @Override
     public void start(Stage stage) throws Exception{
@@ -141,7 +139,8 @@ public class Main extends Application implements PolygonMVP{
     }
 
     public void showPolygon(String polygon){
-        JSONArray polygons = new JSONArray(polygon);
+      //  System.out.println("Polygon return: " +polygon);
+        JSONObject polygons = new JSONObject(polygon);
         System.out.println("Polygon return: "+polygons.toString());
     }
 

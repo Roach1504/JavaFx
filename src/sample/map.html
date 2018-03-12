@@ -99,7 +99,7 @@
     <script src="https://npmcdn.com/leaflet@1.2.0/dist/leaflet.js"></script>
     <script src="https://npmcdn.com/leaflet.path.drag/src/Path.Drag.js"></script>
     <!--<script src="https://github.com/Leaflet/Leaflet.Editable/blob/master/src/Leaflet.Editable.js"></script>-->
-
+    <!--<script src="C:/Users/Android/Desktop/JavaWeb/stepic_java_webserver-master/stepic_java_webserver-master/untitled/src/Path.Drag"></script>-->
     <style type='text/css'>
       body { margin:0; padding:0; }
       #map { position:absolute; top:0; bottom:0; right: 0; left: 0; width:100%; }
@@ -107,6 +107,7 @@
 </head>
 <body>
 <div id="map" style="width: 800px; height: 500px;"></div>
+
 <script type="text/javascript">
 'use strict';
 (function (factory, window) {
@@ -2024,14 +2025,164 @@
 
 }, window));
 
+'use strict';
+
+/* A Draggable that does not update the element position
+and takes care of only bubbling to targetted path in Canvas mode. */
+L.PathDraggable = L.Draggable.extend({
+
+  initialize: function (path) {
+    this._path = path;
+    this._canvas = (path._map.getRenderer(path) instanceof L.Canvas);
+    var element = this._canvas ? this._path._map.getRenderer(this._path)._container : this._path._path;
+    L.Draggable.prototype.initialize.call(this, element, element, true);
+  },
+
+  _updatePosition: function () {
+    var e = {originalEvent: this._lastEvent};
+    this.fire('drag', e);
+  },
+
+  _onDown: function (e) {
+    var first = e.touches ? e.touches[0] : e;
+    this._startPoint = new L.Point(first.clientX, first.clientY);
+    if (this._canvas && !this._path._containsPoint(this._path._map.mouseEventToLayerPoint(first))) { return; }
+    L.Draggable.prototype._onDown.call(this, e);
+  }
+
+});
+
+
+L.Handler.PathDrag = L.Handler.extend({
+
+  initialize: function (path) {
+    this._path = path;
+  },
+
+  getEvents: function () {
+    return {
+      dragstart: this._onDragStart,
+      drag: this._onDrag,
+      dragend: this._onDragEnd
+    };
+  },
+
+  addHooks: function () {
+    if (!this._draggable) { this._draggable = new L.PathDraggable(this._path); }
+    this._draggable.on(this.getEvents(), this).enable();
+    L.DomUtil.addClass(this._draggable._element, 'leaflet-path-draggable');
+  },
+
+  removeHooks: function () {
+    this._draggable.off(this.getEvents(), this).disable();
+    L.DomUtil.removeClass(this._draggable._element, 'leaflet-path-draggable');
+  },
+
+  moved: function () {
+    return this._draggable && this._draggable._moved;
+  },
+
+  _onDragStart: function () {
+    this._startPoint = this._draggable._startPoint;
+    this._path
+        .closePopup()
+        .fire('movestart')
+        .fire('dragstart');
+  },
+
+  _onDrag: function (e) {
+    var path = this._path,
+        event = (e.originalEvent.touches && e.originalEvent.touches.length === 1 ? e.originalEvent.touches[0] : e.originalEvent),
+        newPoint = L.point(event.clientX, event.clientY),
+        latlng = path._map.layerPointToLatLng(newPoint);
+
+    this._offset = newPoint.subtract(this._startPoint);
+    this._startPoint = newPoint;
+
+    this._path.eachLatLng(this.updateLatLng, this);
+    path.redraw();
+
+    e.latlng = latlng;
+    e.offset = this._offset;
+    path.fire('drag', e);
+    e.latlng = this._path.getCenter ? this._path.getCenter() : this._path.getLatLng();
+    path.fire('move', e);
+  },
+
+  _onDragEnd: function (e) {
+    if (this._path._bounds) this.resetBounds();
+    this._path.fire('moveend')
+        .fire('dragend', e);
+  },
+
+  latLngToLayerPoint: function (latlng) {
+    // Same as map.latLngToLayerPoint, but without the round().
+    var projectedPoint = this._path._map.project(L.latLng(latlng));
+    return projectedPoint._subtract(this._path._map.getPixelOrigin());
+  },
+
+  updateLatLng: function (latlng) {
+    var oldPoint = this.latLngToLayerPoint(latlng);
+    oldPoint._add(this._offset);
+    var newLatLng = this._path._map.layerPointToLatLng(oldPoint);
+    latlng.lat = newLatLng.lat;
+    latlng.lng = newLatLng.lng;
+  },
+
+  resetBounds: function () {
+    this._path._bounds = new L.LatLngBounds();
+    this._path.eachLatLng(function (latlng) {
+      this._bounds.extend(latlng);
+    });
+  }
+
+});
+
+L.Path.include({
+
+  eachLatLng: function (callback, context) {
+    context = context || this;
+    var loop = function (latlngs) {
+      for (var i = 0; i < latlngs.length; i++) {
+        if (L.Util.isArray(latlngs[i])) loop(latlngs[i]);
+        else callback.call(context, latlngs[i]);
+      }
+    };
+    loop(this.getLatLngs ? this.getLatLngs() : [this.getLatLng()]);
+  }
+
+});
+
+L.Path.addInitHook(function () {
+
+  this.dragging = new L.Handler.PathDrag(this);
+  if (this.options.draggable) {
+    this.once('add', function () {
+      this.dragging.enable();
+    });
+  }
+
+});
+<!--start-_______________________________________________________________________________________________________________________->
+
 var startPoint = [-84.76514, 204.52197];
-var map = L.map('map', {editable: true, crs: L.CRS.Simple, minZoom: 11}).setView(startPoint, 12),
-    tilelayer = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',
-     {maxZoom: 20, minZoom: 2,
+var layer = 0;
+var map = L.map('map',{
+    editable: true,
+    crs: L.CRS.Simple,
+    minZoom: 11}).setView(startPoint, 12),
+    layer = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
+      maxZoom: 20,
+      minZoom: 2,
       attribution: 'Data \u00a9 <a href="http://www.openstreetmap.org/copyright"> OpenStreetMap Contributors </a> Tiles \u00a9 HOT',
-        subdomains:['mt0','mt1','mt2','mt3']}).addTo(map);
+      subdomains:['mt0','mt1','mt2','mt3']
+      }).addTo(map);
 
 
+    function clickMap(e){
+        App.showJSLog("ClickMap");
+    }
+        map.on('click',clickMap);
 
     L.EditControl = L.Control.extend({
 
@@ -2040,6 +2191,7 @@ var map = L.map('map', {editable: true, crs: L.CRS.Simple, minZoom: 11}).setView
             callback: null,
             kind: '',
             html: ''
+
         },
 
         onAdd: function (map) {
@@ -2070,109 +2222,76 @@ var map = L.map('map', {editable: true, crs: L.CRS.Simple, minZoom: 11}).setView
 
     });
 
+    map.addControl(new L.NewPolygonControl());
+<!--request___________________________________________________________-->
+
 
     function getURL(url, callback) {
-  var req = new XMLHttpRequest();
-  req.open("POST", url, true);
-  req.addEventListener("load", function() {
-    if (req.status < 400)
-      callback(req.responseText);
-    else
-      callback(null, new Error("Request failed: " +
-                               req.statusText));
-  });
-  req.addEventListener("error", function() {
-    callback(null, new Error("Network error"));
-  });
-  req.send(null);
-}
-
-function reqestJS(id){
-
-var http = new XMLHttpRequest();
-var url = "http://109.120.189.141:81/web/court_new/district_s.php";
-var params = "id="+id;
-http.open("POST", url, true);
-
-//Send the proper header information along with the request
-http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-
-http.onreadystatechange = function() {//Call a function when the state changes.
-    if(http.readyState == 4 && http.status == 200) {
-        App.test1(http.responseText);
+        var req = new XMLHttpRequest();
+        req.open("POST", url, true);
+        req.addEventListener("load", function() {
+            if (req.status < 400)
+                callback(req.responseText);
+            else
+                callback(null, new Error("Request failed: " + req.statusText));
+        });
+        req.addEventListener("error", function() {
+            callback(null, new Error("Network error"));
+        });
+        req.send(null);
     }
-}
 
-http.send(params);
-}
-
-    function clickMap(e){
-         App.showJSLog("position = " + e.latlng);
-                  App.showJSLog("0");
+    function reqestJS(id){
+        var http = new XMLHttpRequest();
+        var url = "http://109.120.189.141:81/web/court_new/district_s.php";
+        var params = "id="+id;
+        http.open("POST", url, true);
+        http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        http.onreadystatechange = function() {//Call a function when the state changes.
+            if(http.readyState == 4 && http.status == 200) {
+                App.test1(http.responseText);
+            }
+        }
+        http.send(params);
     }
-        map.on('click',clickMap);
 
 
     function addPolygon (polygon, colorp) {
 
-         App.showJSLog(colorp);
+          var poly = L.polygon(polygon,{
+            color: 'blue' ,
+            fillColor: colorp,
+            fillOpacity: 0.5,
+            draggable: false
+            }
+            ).addTo(map);
 
-    App.showJSLog("polygon = " + polygon.length);
-        var poly = L.polygon(polygon,
-        {color: 'blue' ,fillColor: colorp,   fillOpacity: 0.5}).addTo(map);
-        <!--poly.enableEdit();-->
-        poly.on('dblclick', L.DomEvent.stop).on('dblclick', poly.toggleEdit);
+        poly.dragging.disable();
 
-        poly.bindPopup('QWERTY');
-        App.showPolygon('['+poly.toGeoJSON().geometry.coordinates+']');
-        <!--poly.on('click',getPolygon);-->
+
+        <!--Editing polygon and disable dragging chosen parth -->
+      poly.on('click', function(e){
+        App.showJSLog("QWRIOP   " +e.target);
+        poly.disableEdit();
+        e.target.toggleEdit();
+        e.target.dragging.disable();
+
+        <!--test disable edit maybe it is needed-->
+
+        <!--App.showJSLog(selectablePolygon);-->
+            <!--if (selectablePolygon!=null) {-->
+                <!--selectablePolygon.editing.disable();-->
+                <!--selectablePolygon = e.target;-->
+                <!--e.target.editing.enable();-->
+            <!--}-->
+
+      });
+
+        <!--poly.bindPopup('QWERTY');-->
+        App.showPolygon('['+poly.toGeoJSON().properties.color+']');
+        <!--App.showPolygon('['+poly.toGeoJSON().geometry.coordinates+']');-->
+
     }
-
-    function getPolygon(poly){
-        App.showPolygon(poly.toGeoJSON());
-    }
-
-    <!--var poly = L.polygon([-->
-
-        <!--[-84.77593,204.53278],-->
-        <!--[-84.767822265625,204.527099609375],-->
-        <!--[-84.773193359375,204.50634765625]-->
-
-    <!--]).addTo(map);-->
-
-    <!--var rec = L.rectangle([-->
-        <!--[43.1235, 1.255],-->
-        <!--[43.1215, 1.259]-->
-    <!--]).addTo(map);-->
-    <!--rec.enableEdit();-->
-
-    <!--rec.on('dblclick', L.DomEvent.stop).on('dblclick', rec.toggleEdit);-->
-
-    <!--var circle = L.circle([43.1220, 1.250], {radius: 100}).addTo(map);-->
-    <!--circle.enableEdit();-->
-    <!--circle.on('dblclick', L.DomEvent.stop).on('dblclick', circle.toggleEdit);-->
-
-    <!--var line = L.polyline([-->
-        <!--[43.1292, 1.256],-->
-        <!--[43.1295, 1.259],-->
-        <!--[43.1291, 1.261]-->
-    <!--]).addTo(map);-->
-    <!--line.enableEdit();-->
-    <!--line.on('dblclick', L.DomEvent.stop).on('dblclick', line.toggleEdit);-->
-
-
-
-
-    <!--map.addControl(new L.NewMarkerControl());-->
-    <!--map.addControl(new L.NewLineControl());-->
-    map.addControl(new L.NewPolygonControl());
-    <!--map.addControl(new L.NewRectangleControl());-->
-    <!--map.addControl(new L.NewCircleControl());-->
-
-
-
-
-
 </script>
 </body>
 </html>
