@@ -46,7 +46,6 @@ public class Main extends Application implements PolygonMVP{
         JSONObject geo = new JSONObject(test);
         JSONArray features = geo.getJSONArray("features");
 
-
         for (int i = 0; i < features.length(); i++) {
             JSONObject feature = new JSONObject(features.get(i));
             JSONObject properties = features.getJSONObject(i).getJSONObject("properties");
@@ -72,7 +71,8 @@ public class Main extends Application implements PolygonMVP{
                 pointList.add(a);
             }
             JSONArray poly = new JSONArray(pointList);
-                invokeJS("addPolygon(" +poly + "," + "\'" + propertesList.get(i).getColor() + "\'" + ")");
+//            System.out.println("features.length() = "+ poly.length());
+            invokeJS("addPolygon(" +poly + "," + "\'" + propertesList.get(i).getColor() + "\'" + ")");
          }
     }
     @Override
@@ -138,8 +138,8 @@ public class Main extends Application implements PolygonMVP{
         System.out.println("JS ERROR: "+message);
     }
 
-    public void showPolygon(String polygon){
-      //  System.out.println("Polygon return: " +polygon);
+    public void showPolygon(Object polygon){
+//        System.out.println("Polygon return: " +polygon.toString());
         JSONObject polygons = new JSONObject(polygon);
         System.out.println("Polygon return: "+polygons.toString());
     }
@@ -148,6 +148,7 @@ public class Main extends Application implements PolygonMVP{
         for(int i=1; i<=20; i++) {
             invokeJS("reqestJS(" + i + ")");
         }
+//        invokeJS("reqestJS(" + 2 + ")");
 //        List<Point> polygon = new ArrayList<>();
 //        Point p1 = new Point("-84.77593", "204.53278" );
 //        Point p2 = new Point("-84.767822265625", "204.527099609375");

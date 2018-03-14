@@ -2163,10 +2163,9 @@ L.Path.addInitHook(function () {
   }
 
 });
-<!--start-_______________________________________________________________________________________________________________________->
+<!--start_______________________________________________________________________________________________________________________-->
 
 var startPoint = [-84.76514, 204.52197];
-var layer = 0;
 var map = L.map('map',{
     editable: true,
     crs: L.CRS.Simple,
@@ -2254,8 +2253,13 @@ var map = L.map('map',{
         }
         http.send(params);
     }
-
-
+    function disablePolygonEdit(arr){
+        for (var i = 0; i< arr.length; i++){
+            arr[i].disableEdit();
+        }
+    }
+    var arr = [];
+    var lastEvent = null;
     function addPolygon (polygon, colorp) {
 
           var poly = L.polygon(polygon,{
@@ -2265,33 +2269,57 @@ var map = L.map('map',{
             draggable: false
             }
             ).addTo(map);
+        arr.push(poly);
 
-        poly.dragging.disable();
+
+        poly.dragging.disable(); <!--disable dragging on all polygons->>
 
 
-        <!--Editing polygon and disable dragging chosen parth -->
-      poly.on('click', function(e){
-        App.showJSLog("QWRIOP   " +e.target);
-        poly.disableEdit();
-        e.target.toggleEdit();
-        e.target.dragging.disable();
+        var selectablePolygon = null;
 
-        <!--test disable edit maybe it is needed-->
+        poly.on('click', function(e){
+
+
+        App.showJSLog("e target= " + e.target.style);
+
+        if (lastEvent !== null){
+             App.showJSLog("lastEvent 2= " + lastEvent);
+             lastEvent.disableEdit();
+             App.showJSLog("lastEvent 3= " + lastEvent);
+             lastEvent = e.target; <!--remember last target-->
+             e.target.enableEdit(); <!--if polygon is enableEdit then disableEdit -->
+             e.target.dragging.disable(); <!--Editing polygon and disable dragging chosen path -->
+        }
+        else {
+            lastEvent = e.target;
+            e.target.enableEdit();
+            e.target.dragging.disable();
+            App.showJSLog("lastEvent 4= " + lastEvent);
+        }
+        <!--if (lastEvent == e.target){e.target.toggleEdit();} &lt;!&ndash;If we twice click on polygon &ndash;&gt;-->
+
+
+
+        <!--App.showPolygon('['+e.target.toGeoJSON().geometry.coordinates+']');-->
+        <!--test disable edit, maybe it is needed, main idea-->
 
         <!--App.showJSLog(selectablePolygon);-->
-            <!--if (selectablePolygon!=null) {-->
-                <!--selectablePolygon.editing.disable();-->
+            <!--if (selectablePolygon) {-->
+                <!--selectablePolygon.disableEdit();-->
                 <!--selectablePolygon = e.target;-->
-                <!--e.target.editing.enable();-->
+                <!--e.target.enableEdit();-->
             <!--}-->
-
       });
-
+          <!--poly.on('dblclick', function(e){-->
+          <!--App.showJSLog("dblclick");-->
+                <!--e.target.disableEdit();-->
+          <!--});-->
         <!--poly.bindPopup('QWERTY');-->
-        App.showPolygon('['+poly.toGeoJSON().properties.color+']');
+       <!--App.showPolygon('['+poly.toGeoJSON().properties+']');-->
         <!--App.showPolygon('['+poly.toGeoJSON().geometry.coordinates+']');-->
 
     }
+
 </script>
 </body>
 </html>
